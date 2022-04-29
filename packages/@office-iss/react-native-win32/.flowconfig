@@ -60,9 +60,6 @@
 
 .*/node_modules/resolve/test/resolver/malformed_package_json/package\.json$
 
-; Ignore files with flow typing issues #
-.*/react-native-win32/Libraries/Pressability/Pressability.win32.js
-
 [untyped]
 .*/node_modules/@react-native-community/cli/.*/.*
 ; Should work out how to do this properly
