@@ -687,9 +687,9 @@ export default class Pressability {
                     }
                   }
                 }
-              }
-            },
-          };
+              },
+            };
+    }
 
     // [Windows
     const keyboardEventHandlers = {

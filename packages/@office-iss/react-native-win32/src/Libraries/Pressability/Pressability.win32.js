@@ -9,10 +9,7 @@
  */
 
 import invariant from 'invariant';
-import * as React from 'react';
 import SoundManager from '../Components/Sound/SoundManager';
-import UIManager from '../ReactNative/UIManager';
-import type {HostComponent} from '../Renderer/shims/ReactNativeTypes';
 import {normalizeRect, type RectOrSize} from '../StyleSheet/Rect';
 import type {
   BlurEvent,
@@ -21,7 +18,6 @@ import type {
   MouseEvent,
   PressEvent,
 } from '../Types/CoreEventTypes';
-import Platform from '../Utilities/Platform';
 import {isHoverEnabled} from './HoverState';
 import PressabilityPerformanceEventEmitter from './PressabilityPerformanceEventEmitter.js';
 import {type PressabilityTouchSignal as TouchSignal} from './PressabilityTypes.js';
@@ -644,10 +640,10 @@ export default class Pressability {
           : {
               onMouseEnter: (event: MouseEvent): void => {
                 // [Windows Add attached raw mouse event handler for compat
-              if (this._config.onMouseEnter) {
-                this._config.onMouseEnter(event);
-              }
-              // Windows]
+                if (this._config.onMouseEnter) {
+                  this._config.onMouseEnter(event);
+                }
+                // Windows]
                 if (isHoverEnabled()) {
                   this._isHovered = true;
                   this._cancelHoverOutDelayTimeout();
@@ -670,10 +666,10 @@ export default class Pressability {
 
               onMouseLeave: (event: MouseEvent): void => {
                 // [Windows Add attached raw mouse event handler for compat
-              if (this._config.onMouseLeave) {
-                this._config.onMouseLeave(event);
-              }
-              // Windows]
+                if (this._config.onMouseLeave) {
+                  this._config.onMouseLeave(event);
+                }
+                // Windows]
                 if (this._isHovered) {
                   this._isHovered = false;
                   this._cancelHoverInDelayTimeout();
@@ -692,9 +688,9 @@ export default class Pressability {
                     }
                   }
                 }
-              }
-            },
-          };
+              },
+            };
+    }
 
     // [Windows
     const keyboardEventHandlers = {
