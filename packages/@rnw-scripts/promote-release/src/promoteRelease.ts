@@ -23,23 +23,31 @@ import {
 } from '@react-native-windows/package-utils';
 import findRepoRoot from '@react-native-windows/find-repo-root';
 
-type ReleaseType = 'preview' | 'latest' | 'legacy';
+type ReleaseType = 'preview' | 'latest' | 'legacy' | 'patch';
 
 (async () => {
   const argv = collectArgs();
   const git = simplegit();
-  const branchName = `${argv.rnVersion}-stable`;
-  const commitMessage = `Promote ${argv.rnVersion} to ${argv.release}`;
+  const branchName = argv.release === 'patch' 
+    ? `${argv.rnVersion}-patch`
+    : `${argv.rnVersion}-stable`;
+  
+    const commitMessage = `Promote ${argv.rnVersion} to ${argv.release}`;
 
-  if (argv.release === 'preview') {
+  if (argv.release === 'preview' || argv.release === 'patch') {
+    if (argv.release === 'patch') {
+      console.log(`Pushing branch ${branchName}...`);
+      await git.push('origin', "HEAD:" + branchName);
+    }
+
     console.log(`Creating branch ${branchName}...`);
     await git.checkoutBranch(branchName, 'HEAD');
   }
 
   console.log('Updating Beachball configuration...');
-  await updateBeachballConfigs(argv.release as ReleaseType, argv.rnVersion);
+  await updateBeachballConfigs(argv.release, argv.rnVersion);
 
-  if (argv.release === 'preview') {
+  if (argv.release === 'preview' || argv.release === 'patch') {
     console.log('Updating root change script...');
     const rootPkg = await WritableNpmPackage.fromPath(await findRepoRoot());
     if (!rootPkg) {
@@ -54,7 +62,10 @@ type ReleaseType = 'preview' | 'latest' | 'legacy';
     });
 
     console.log('Updating package versions...');
-    await updatePackageVersions(`${argv.rnVersion}.0-preview.0`);
+    const targetVersion = argv.release === 'patch'
+      ? `${argv.rnVersion}-patch.0`
+      : `${argv.rnVersion}.0-preview.0`;
+    await updatePackageVersions(targetVersion);
 
     console.log('Setting packages published from main branch as private...');
     await markMainBranchPackagesPrivate();
@@ -67,22 +78,27 @@ type ReleaseType = 'preview' | 'latest' | 'legacy';
   console.log('Generating change files...');
   if (argv.release === 'preview') {
     await createChangeFiles('prerelease', commitMessage);
-  } else {
+  } else if (argv.release === 'patch') {
     await createChangeFiles('patch', commitMessage);
   }
 
-  console.log(chalk.green('All done! Please check locally commited changes.'));
+  console.log(chalk.green('All done! Please check locally committed changes.'));
 })();
+
+interface Arguments { 
+  release : ReleaseType,
+  rnVersion: string 
+}
 
 /**
  * Parse and validate program arguments
  */
-function collectArgs() {
+function collectArgs() : Arguments {
   const argv = yargs
     .options({
       release: {
         describe: 'What release channel to promote to',
-        choices: ['preview', 'latest', 'legacy'],
+        choices: ['preview', 'latest', 'legacy', 'patch'],
         demandOption: true,
       },
       rnVersion: {
@@ -94,12 +110,17 @@ function collectArgs() {
     .wrap(120)
     .version(false).argv;
 
-  if (!argv.rnVersion.match(/\d+\.\d+/)) {
-    console.error(chalk.red('Unexpected format for version (expected x.y)'));
+
+  const versionCheck = argv.release === "patch"
+    ? {regex: /\d+\.\d+\.\d+/, str: "x.y.z"}
+    : {regex: /\d+\.\d+/, str: "x.y"};
+
+  if (!argv.rnVersion.match(versionCheck.regex)) {
+    console.error(chalk.red(`Unexpected format for version (expected ${versionCheck.str})`));
     process.exit(1);
   }
 
-  return argv;
+  return argv as Arguments;
 }
 
 /**
@@ -128,6 +149,7 @@ async function updateBeachballConfig(
   version: string,
 ) {
   switch (release) {
+    case 'patch':
     case 'preview':
       return pkg.mergeProps({
         beachball: {
@@ -170,7 +192,10 @@ async function enumeratePackagesToPromote(): Promise<WritableNpmPackage[]> {
 function distTag(release: ReleaseType, version: string): string {
   if (release === 'legacy') {
     return `v${version}-stable`;
-  } else {
+  } else if (release === 'patch') {
+    return `v${version}-patch`;
+  }
+  else {
     return release;
   }
 }
