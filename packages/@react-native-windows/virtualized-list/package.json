@@ -1,6 +1,6 @@
 {
   "name": "@react-native-windows/virtualized-list",
-  "version": "0.66.1",
+  "version": "0.66.15-patch.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -33,11 +33,11 @@
     "react-native": "0.66.0"
   },
   "beachball": {
-    "defaultNpmTag": "v0.66-stable",
+    "defaultNpmTag": "v0.66.15-patch",
     "disallowedChangeTypes": [
       "major",
       "minor",
-      "prerelease"
+      "patch"
     ]
   },
   "promoteRelease": true

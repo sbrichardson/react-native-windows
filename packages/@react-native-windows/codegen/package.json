@@ -1,6 +1,6 @@
 {
   "name": "@react-native-windows/codegen",
-  "version": "0.66.1",
+  "version": "0.66.15-patch.0",
   "description": "Generators for react-native-codegen targeting react-native-windows",
   "main": "index.js",
   "repository": "https://github.com/microsoft/react-native-windows",
@@ -43,11 +43,11 @@
     "typescript": "^3.8.3"
   },
   "beachball": {
-    "defaultNpmTag": "v0.66-stable",
+    "defaultNpmTag": "v0.66.15-patch",
     "disallowedChangeTypes": [
       "major",
       "minor",
-      "prerelease"
+      "patch"
     ]
   },
   "promoteRelease": true
